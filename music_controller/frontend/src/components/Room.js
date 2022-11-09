@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Grid, Button, Typography } from "@material-ui/core";
 import { withRouter } from "../HOCs/withRouter";
-import { useNavigate } from "react-router-dom";
+import CreateRoomPage from "./CreateRoomPage";
 
  class Room extends Component {
   constructor(props) {
@@ -10,13 +10,19 @@ import { useNavigate } from "react-router-dom";
       votesToSkip: 2,
       guestCanPause: false,
       isHost: false,
+      showSettings: false,
     };
     ///
     // Check what the new way of accessing this.props.match.params in CBCs is
     ///
     this.roomCode = window.location.href.split('/')[4];
-    this.getRoomDetails();
     this.leaveButtonPressed = this.leaveButtonPressed.bind(this)
+    this.updateShowSettings = this.updateShowSettings.bind(this)
+    this.renderSettingsButton = this.renderSettingsButton.bind(this)
+    this.renderSettings = this.renderSettings.bind(this)
+    this.getRoomDetails = this.getRoomDetails.bind(this)
+    this.getRoomDetails();
+
   }
 
   getRoomDetails() {
@@ -48,7 +54,57 @@ import { useNavigate } from "react-router-dom";
       this.props.navigate('/')
     })
   }
+
+  updateShowSettings(value) {
+    this.setState({
+      showSettings: value,
+    });
+  }
+
+  renderSettings() {
+    return (
+      <Grid container spacing={1}>
+        <Grid item xs={12} align="center">
+          <CreateRoomPage
+            update={true}
+            votesToSkip={this.state.votesToSkip}
+            guestCanPause={this.state.guestCanPause}
+            roomCode={this.roomCode}
+            updateCallback={this.getRoomDetails}
+          />
+        </Grid>
+        <Grid item xs={12} align="center">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => this.updateShowSettings(false)}
+          >
+           Close
+          </Button>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  renderSettingsButton() {
+    return (
+ 
+        <Grid item xs={12} align="center">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.updateShowSettings(true)}
+          >
+            Settings
+          </Button>
+        </Grid>
+    );
+  }
+
   render() {
+    if (this.state.showSettings) {
+      return this.renderSettings()
+    } 
     return (
       <Grid container spacing={1}>
       <Grid item xs={12} align="center">
@@ -71,6 +127,7 @@ import { useNavigate } from "react-router-dom";
           Host: {this.state.isHost.toString()}
         </Typography>
       </Grid>
+      {this.state.isHost ? this.renderSettingsButton() : null }
       <Grid item xs={12} align="center">
         <Button
           variant="contained"
