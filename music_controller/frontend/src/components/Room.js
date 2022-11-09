@@ -11,6 +11,8 @@ import CreateRoomPage from "./CreateRoomPage";
       guestCanPause: false,
       isHost: false,
       showSettings: false,
+      spotifyAuthenticated: false,
+
     };
     ///
     // Check what the new way of accessing this.props.match.params in CBCs is
@@ -21,6 +23,7 @@ import CreateRoomPage from "./CreateRoomPage";
     this.renderSettingsButton = this.renderSettingsButton.bind(this)
     this.renderSettings = this.renderSettings.bind(this)
     this.getRoomDetails = this.getRoomDetails.bind(this)
+    this.authenticateSpotify = this.authenticateSpotify.bind(this)
     this.getRoomDetails();
 
   }
@@ -40,6 +43,26 @@ import CreateRoomPage from "./CreateRoomPage";
           guestCanPause: data.guest_can_pause,
           isHost: data.is_host,
         });
+        if (this.state.isHost) {
+          this.authenticateSpotify()
+
+        }
+      });
+  }
+
+  authenticateSpotify() {
+    fetch("/spotify/is-authenticated")
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({ spotifyAuthenticated: data.status });
+        console.log(data.status);
+        if (!data.status) {
+          fetch("/spotify/get-auth-url")
+            .then((response) => response.json())
+            .then((data) => {
+              window.location.replace(data.url);
+            });
+        }
       });
   }
 
